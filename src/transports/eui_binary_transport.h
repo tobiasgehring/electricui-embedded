@@ -49,7 +49,7 @@ enum parseStates {
  * @param buffer Pointer to target buffer (min 3-bytes)
  * @return uint8_t Status encoded as number of header bytes encoded
  */
-uint8_t
+extern uint8_t
 encode_header( eui_header_t *header, uint8_t *buffer );
 
 /**
@@ -66,7 +66,7 @@ encode_header( eui_header_t *header, uint8_t *buffer );
  * @param size Number of bytes to encode
  * @return uint8_t 
  */
-uint8_t
+extern uint8_t
 encode_framing( uint8_t *buffer, uint16_t size );
 
 /**
@@ -82,7 +82,7 @@ encode_framing( uint8_t *buffer, uint16_t size );
  * @param header payload Pointer to payload data
  * @return uint8_t Encoder/Output status codes - see eui_output_errors
  */
-uint8_t
+extern uint8_t
 encode_packet_simple(   callback_data_out_t output_function,
                         eui_pkt_settings_t  *settings,
                         const char          *msg_id,
@@ -104,7 +104,7 @@ encode_packet_simple(   callback_data_out_t output_function,
  * @return uint8_t Encoder/Output status codes
  * @see eui_output_errors for status return codes
  */
-uint8_t
+extern uint8_t
 encode_packet(  callback_data_out_t out_char,
                 eui_header_t        *header,
                 const char          *msg_id,
@@ -119,7 +119,7 @@ encode_packet(  callback_data_out_t out_char,
  * @return uint8_t Parser status codes
  * @see eui_parse_errors for status return codes
  */
-uint8_t
+extern uint8_t
 decode_packet(uint8_t inbound_byte, eui_packet_t *p_link_in);
 
 /**
@@ -130,7 +130,7 @@ decode_packet(uint8_t inbound_byte, eui_packet_t *p_link_in);
  * @return uint8_t Parser status codes
  * @see eui_parse_errors for status return codes
  */
-uint8_t
+extern uint8_t
 parse_decoded_packet(uint8_t byte_in, eui_packet_t *p_link_in);
 
 #endif //end EUI_BINARY_TRANSPORT_H

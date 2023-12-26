@@ -110,8 +110,13 @@ encode_packet(  callback_data_out_t out_char,
 {
     uint8_t status = EUI_OUTPUT_ERROR;
 
-    if( out_char && header && msg_id && payload )
-    {  
+    if( out_char && header && msg_id )
+    {
+        if (!payload && (header->data_len > 0))
+        {
+            return status;
+        }
+
         uint8_t pk_tmp[ 1 + PACKET_BASE_SIZE + EUI_MAX_MSGID_SIZE + PAYLOAD_SIZE_MAX + 4 ] = { 0 };
         uint16_t pk_i = 2; // Leave room for the 0x00 and framing offset byte
 
