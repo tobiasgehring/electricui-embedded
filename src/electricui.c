@@ -525,7 +525,7 @@ eui_setup_tracked( eui_message_t *msg_array, eui_variable_count_t num_tracked )
 }
 
 void
-eui_setup_identifier( char * uuid, uint8_t bytes )
+eui_setup_identifier( const char * uuid, uint8_t bytes )
 {
     if( uuid && bytes )
     {
