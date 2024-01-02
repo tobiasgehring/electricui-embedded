@@ -177,12 +177,14 @@ uint8_t
 decode_packet(uint8_t byte_in, eui_packet_t *p_link_in)
 {
     uint8_t status = EUI_PARSER_IDLE;
-    
+
     if( 0x00u == byte_in )
     {
         //reset
         p_link_in->parser.state = 0u;
         p_link_in->crc_in = 0xFFFFu;
+        p_link_in->parser.frame_offset = 0;
+        p_link_in->parser.last_cobs_byte_value = 0;
     }
     else
     {
@@ -195,7 +197,17 @@ decode_packet(uint8_t byte_in, eui_packet_t *p_link_in)
         {
             // Offset has expired, this inbound byte should be the next data framing byte
             p_link_in->parser.frame_offset = byte_in;
-            byte_in = 0x00u; // Replace with pre-COBS byte.
+            if (p_link_in->parser.last_cobs_byte_value < 0xFF)
+            {
+                byte_in = 0x00u; // Replace with pre-COBS byte.
+                p_link_in->parser.last_cobs_byte_value = p_link_in->parser.frame_offset;
+            }
+            else
+            {
+                // this is a stuffed COBS byte
+                p_link_in->parser.last_cobs_byte_value = p_link_in->parser.frame_offset;
+                return EUI_PARSER_IDLE;
+            }
         }
 
         // CRC data up to the packet's CRC
@@ -298,10 +310,11 @@ parse_decoded_packet( uint8_t byte_in, eui_packet_t *p_link_in )
             p_link_in->parser.data_bytes_in++;
 
             if( (  (uint16_t)p_link_in->parser.data_bytes_in >= (uint16_t)p_link_in->header.data_len )
-                || ( (uint16_t)p_link_in->parser.data_bytes_in >= PAYLOAD_SIZE_MAX) )
+                || ( (uint16_t)p_link_in->parser.data_bytes_in >= PAYLOAD_SIZE_MAX ) )
             {
                 p_link_in->parser.state = exp_crc_b1;
             }
+
         break;
         
         case exp_crc_b1:

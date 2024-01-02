@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 #include "../eui_types.h"
+#include "eui_config.h"
 
 /**
  * @brief Base overhead of a packet encoding and header
@@ -44,11 +45,12 @@
  *
  * Keeps track of parser state, and provides length tracking for the buffers being manipulated by the parser.
  */
-typedef struct {
+typedef struct __attribute__ ((packed)) {
     unsigned state          : 4;    ///< parseStates statemachine control flag
     unsigned id_bytes_in    : 4;    ///< Count parsed identifier string bytes
     unsigned data_bytes_in  : 10;   ///< Count parsed payload data bytes
     uint8_t  frame_offset;          ///< Tracks bytes until the next inbound COBS framing byte
+    uint8_t last_cobs_byte_value;   ///< remembers last COBS framing byte value
 } eui_parser_state_t;
 
 /**

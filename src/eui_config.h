@@ -30,7 +30,7 @@
 // Default payload size for the inbound parsing buffer is 120 bytes.
 // Manually reduce or increase the size as shown below.
 
-//#define PAYLOAD_SIZE_MAX 512
+#define PAYLOAD_SIZE_MAX 1023
 
 #ifndef EUI_OVERRIDE_DEFAULT_PROTOCOL
     #include "transports/eui_binary_transport.h"
