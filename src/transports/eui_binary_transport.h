@@ -56,18 +56,17 @@ encode_header( eui_header_t *header, uint8_t *buffer );
  * @brief Apply COBS framing to the outbound bytestream
  *
  * COBS framing is applied to the packet to provide 0x00 based frame synchronisation.
- * As most packets are under the 255 byte framing offset requirement, this implementation opts to mutate in place,
- * with the less common 'framing overhead' bytes being inserted by rippling the remaining data backwards in the array.
  *
- * @warning The input buffer must be sized to fit the entire packet, 
- * with additional room for the starting 0x00, framing byte, and up to 3 additional framing bytes
+ * @warning The output buffer must be sized to fit the entire packet,
+ * with additional room for the framing byte, and up to 4 additional framing bytes
  *
  * @param buffer Pointer to data to encode
- * @param size Number of bytes to encode
- * @return uint8_t 
+ * @param buf_size Number of bytes to encode
+ * @param output_buffer Pointer to the buffer holding the encoded data
+ * @return uint8_t Number of bytes in output buffer
  */
-extern uint8_t
-encode_framing( uint8_t *buffer, uint16_t size );
+extern uint16_t
+encode_framing(const uint8_t *buffer, uint16_t buf_size, uint8_t *output_buffer );
 
 /**
  * @brief Simpler packet output function

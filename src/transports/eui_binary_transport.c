@@ -66,39 +66,29 @@ encode_header( eui_header_t *header, uint8_t *buffer )
     return bytes_written;
 }
 
-uint8_t
-encode_framing( uint8_t *buffer, uint16_t buf_size )
+uint16_t
+encode_framing(const uint8_t *buffer, uint16_t buf_size, uint8_t *output_buffer)
 {
-    uint16_t previous_null = 0;
+    // from wikipedia
+    uint8_t *encode = output_buffer; // Encoded byte pointer
+    uint8_t *p_code = encode++; // Output code pointer
+    uint8_t code = 1; // Code value
 
-    for( uint16_t i = 1; i < buf_size; i++ )
+    for (const uint8_t *byte = (const uint8_t *)buffer; buf_size--; ++byte)
     {
-        uint8_t bytes_since = i - previous_null;
+        if (*byte) // Byte not zero, write it
+            *encode++ = *byte, ++code;
 
-        if( buffer[i] == 0x00u )
+        if (!*byte || code == 0xff) // Input is zero or block completed, restart
         {
-            buffer[previous_null] = bytes_since;
-            previous_null = i;
-        } 
-        else if( bytes_since == 0xFFu )
-        {
-            buffer[previous_null] = 0xFFu;
-
-            // Ripple the buffer of data back one byte to make room
-            // This 'extra' new byte is now the offset
-            for( uint16_t j = 1; j < (buf_size-i); j++ )
-            {
-                buffer[ buf_size-j ] = buffer[ buf_size-j-1 ];
-            }
-
-            buffer[i] = 0xEEu;
-            previous_null = i;
+            *p_code = code, code = 1, p_code = encode;
+            if (!*byte || buf_size)
+                ++encode;
         }
     }
+    *p_code = code; // Write final code value
 
-    buffer[0] = 0x00;
-
-    return 0;
+    return (size_t)(encode - output_buffer);
 }
 
 uint8_t
@@ -117,8 +107,9 @@ encode_packet(  callback_data_out_t out_char,
             return status;
         }
 
-        uint8_t pk_tmp[ 1 + PACKET_BASE_SIZE + EUI_MAX_MSGID_SIZE + PAYLOAD_SIZE_MAX + 4 ] = { 0 };
-        uint16_t pk_i = 2; // Leave room for the 0x00 and framing offset byte
+        #define MAX_PACKET_SIZE (PACKET_BASE_SIZE + EUI_MAX_MSGID_SIZE + PAYLOAD_SIZE_MAX )
+        uint8_t pk_tmp[ MAX_PACKET_SIZE ] = {0 };
+        uint16_t pk_i = 0;
 
         // Write header bytes into the buffer
         pk_i += encode_header( header, &pk_tmp[pk_i] );
@@ -141,7 +132,7 @@ encode_packet(  callback_data_out_t out_char,
 
         // Calculate and write CRC
         uint16_t outbound_crc = 0xFFFFu;
-        for( uint16_t i = 2; i < pk_i; i++ )
+        for( uint16_t i = 0; i < pk_i; i++ )
         {
             crc16( pk_tmp[i], &outbound_crc );
         }
@@ -150,10 +141,11 @@ encode_packet(  callback_data_out_t out_char,
         pk_i += sizeof(outbound_crc);
         
         // Apply Consistent Overhead Byte Stuffing (COBS) for framing/sync
-        pk_i += 1;  // +1 to account for null byte at end
-        encode_framing( pk_tmp, pk_i);    
+        uint8_t pk_encoded[1 + MAX_PACKET_SIZE + 5]; // + 1 zero byte + 5 COBS bytes
+        pk_encoded[0] = 0; // we add a zero in the beginning as packet deliminator
+        uint16_t length = encode_framing( pk_tmp, pk_i, pk_encoded+1);
 
-        out_char( pk_tmp, pk_i );
+        out_char( pk_encoded, length+1 );
     
         status = EUI_OUTPUT_OK;
     }
@@ -184,7 +176,7 @@ decode_packet(uint8_t byte_in, eui_packet_t *p_link_in)
         p_link_in->parser.state = 0u;
         p_link_in->crc_in = 0xFFFFu;
         p_link_in->parser.frame_offset = 0;
-        p_link_in->parser.last_cobs_byte_value = 0;
+        p_link_in->parser.last_cobs_byte_value = 0x00;
     }
     else
     {
