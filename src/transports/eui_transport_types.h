@@ -45,7 +45,7 @@
  *
  * Keeps track of parser state, and provides length tracking for the buffers being manipulated by the parser.
  */
-typedef struct __attribute__ ((packed)) {
+typedef struct __attribute__ ((gcc_struct, packed)) {
     unsigned state          : 4;    ///< parseStates statemachine control flag
     unsigned id_bytes_in    : 4;    ///< Count parsed identifier string bytes
     unsigned data_bytes_in  : 10;   ///< Count parsed payload data bytes

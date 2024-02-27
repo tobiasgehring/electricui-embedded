@@ -144,7 +144,7 @@ typedef void (*callback_data_out_t)(uint8_t*, uint16_t);
  *
  * Contains data used during parsing of packets including sizes, type and intent of the packet
  */
-typedef struct __attribute__ ((packed)) {
+typedef struct __attribute__ ((gcc_struct, packed)) {
     unsigned data_len   : 10;   ///< Length of the payload in bytes. Max 1024 byte payloads supported.
     unsigned type       : 4;    ///< Type of the payload - see the eui_type enum.
     unsigned internal   : 1;    ///< True when message is for the internal namespace (heartbeats etc).
@@ -160,7 +160,7 @@ typedef struct __attribute__ ((packed)) {
  * Used internally to pass _useful_ packet settings to the transport layer, transport layer is expected to generate
  * a full eui_header_t using information from this data + inferred data from id and payload lengths.
  */
-typedef struct __attribute__ ((packed)) {
+typedef struct __attribute__ ((gcc_struct, packed)) {
     unsigned internal   : 1;    ///< True when message is for the internal namespace
     unsigned response   : 1;    ///< True when the packet requires a response
     unsigned type       : 4;    ///< Type of the payload - see the eui_type enum
