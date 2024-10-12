@@ -174,9 +174,11 @@ decode_packet(uint8_t byte_in, eui_packet_t *p_link_in)
     {
         //reset
         p_link_in->parser.state = 0u;
-        p_link_in->crc_in = 0xFFFFu;
+        p_link_in->parser.id_bytes_in = 0;
+        p_link_in->parser.data_bytes_in = 0;
         p_link_in->parser.frame_offset = 0;
         p_link_in->parser.last_cobs_byte_value = 0x00;
+        p_link_in->crc_in = 0xFFFFu;
     }
     else
     {
