@@ -179,6 +179,16 @@ decode_packet(uint8_t byte_in, eui_packet_t *p_link_in)
         p_link_in->parser.frame_offset = 0;
         p_link_in->parser.last_cobs_byte_value = 0x00;
         p_link_in->crc_in = 0xFFFFu;
+        p_link_in->offset_in = 0;
+        memset(p_link_in->data_in, 0, PAYLOAD_SIZE_MAX);
+        memset(p_link_in->id_in, 0, EUI_MAX_MSGID_SIZE);
+        p_link_in->header.acknum = 0;
+        p_link_in->header.data_len = 0;
+        p_link_in->header.id_len = 0;
+        p_link_in->header.internal = 0;
+        p_link_in->header.offset = 0;
+        p_link_in->header.response = 0;
+        p_link_in->header.type = 0;
     }
     else
     {
